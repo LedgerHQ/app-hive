@@ -68,6 +68,7 @@ include_directories(/opt/nanos-secure-sdk/lib_cxng/include)
 include_directories(/opt/nanos-secure-sdk/lib_ux/include)
 include_directories(/opt/nanos-secure-sdk/lib_bagl/include)
 include_directories(/opt/nanos-secure-sdk/lib_stusb/include)
+include_directories(.)
 
 add_executable(test_format common/test_format.c)
 add_executable(test_asn1 common/test_asn1.c)
