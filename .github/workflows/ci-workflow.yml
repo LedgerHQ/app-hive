@@ -20,14 +20,14 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Build
         run: |
           make
 
       - name: Upload app binary
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: hive-app
           path: bin
@@ -36,13 +36,16 @@ jobs:
     name: Unit test
     needs: job_build_debug
     runs-on: ubuntu-latest
-
     container:
-      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder-legacy:latest
 
     steps:
+      - name: Install required packages
+        run: |
+          apt update && apt install -qy libcmocka-dev lcov doxygen
+
       - name: Clone
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Build unit tests
         run: |
@@ -54,13 +57,13 @@ jobs:
           cd unit-tests/
           ./gen_coverage.sh
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: code-coverage
           path: unit-tests/coverage
 
       - name: Upload to codecov.io
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./unit-tests/coverage.info
@@ -72,12 +75,10 @@ jobs:
       - name: HTML documentation
         run: doxygen .doxygen/Doxyfile
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: documentation
           path: doc/html
-
-
 
   job_test:
     name: Test
@@ -97,19 +98,17 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install required packages
         run: |
-          apt update && apt install -qy curl unzip wget gcc # /!\ workaround for pysha3
+          apt update && apt install -qy npm curl unzip wget gcc # /!\ workaround for pysha3
 
       - name: Prepare NodeJS environment
-        run: |
-          curl -sL https://deb.nodesource.com/setup_14.x | bash
-          apt-get install nodejs -yq
+        uses: actions/setup-node@v3
 
       - name: Download app binary
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: hive-app
           path: bin
@@ -120,7 +119,7 @@ jobs:
           cd test && npm ci && npm test
 
       - name: Upload Speculos log
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: speculos-log
           path: speculos.log
